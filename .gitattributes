@@ -1,1 +1,4 @@
 *.go linguist-language=Go
+*.lib linguist-language=Go
+*.dll linguist-language=Go
+*.h linguist-language=Go
