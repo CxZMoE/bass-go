@@ -1,9 +1,11 @@
 package bass
 
+// //#cgo LDFLAGS: -Wl,-rpath="./lib"
 // #cgo LDFLAGS: -Llib -lbass
-// #include "head/bass.h"
+// #include "include/bass.h"
 import "C"
 import (
+	"log"
 	"unsafe"
 )
 
@@ -14,104 +16,269 @@ const ( //Define some constant of bass
 	BASS_ACTIVE_STALLED = C.BASS_ACTIVE_STALLED
 )
 
+// BASS POSsud
+const (
+	BASS_POS_BYTE        = C.BASS_POS_BYTE
+	BASS_POS_MUSIC_ORDER = C.BASS_POS_MUSIC_ORDER
+	BASS_POS_DECODE      = C.BASS_POS_DECODE
+	BASS_POS_OGG         = C.BASS_POS_OGG
+)
+
+// Attribs
+const (
+	// Channel attributes
+	BASS_ATTRIB_FREQ             = 1
+	BASS_ATTRIB_VOL              = 2
+	BASS_ATTRIB_PAN              = 3
+	BASS_ATTRIB_EAXMIX           = 4
+	BASS_ATTRIB_NOBUFFER         = 5
+	BASS_ATTRIB_VBR              = 6
+	BASS_ATTRIB_CPU              = 7
+	BASS_ATTRIB_SRC              = 8
+	BASS_ATTRIB_NET_RESUME       = 9
+	BASS_ATTRIB_SCANINFO         = 10
+	BASS_ATTRIB_NORAMP           = 11
+	BASS_ATTRIB_BITRATE          = 12
+	BASS_ATTRIB_BUFFER           = 13
+	BASS_ATTRIB_MUSIC_AMPLIFY    = 0x100
+	BASS_ATTRIB_MUSIC_PANSEP     = 0x101
+	BASS_ATTRIB_MUSIC_PSCALER    = 0x102
+	BASS_ATTRIB_MUSIC_BPM        = 0x103
+	BASS_ATTRIB_MUSIC_SPEED      = 0x104
+	BASS_ATTRIB_MUSIC_VOL_GLOBAL = 0x105
+	BASS_ATTRIB_MUSIC_ACTIVE     = 0x106
+	BASS_ATTRIB_MUSIC_VOL_CHAN   = 0x200 // + channel #
+	BASS_ATTRIB_MUSIC_VOL_INST   = 0x300 // + instrument #
+)
+
+// ERRORS
+const (
+	// Error codes returned by BASS_ErrorGetCode
+	BASS_OK             = 0  // all is OK
+	BASS_ERROR_MEM      = 1  // memory error
+	BASS_ERROR_FILEOPEN = 2  // can't open the file
+	BASS_ERROR_DRIVER   = 3  // can't find a free/valid driver
+	BASS_ERROR_BUFLOST  = 4  // the sample buffer was lost
+	BASS_ERROR_HANDLE   = 5  // invalid handle
+	BASS_ERROR_FORMAT   = 6  // unsupported sample format
+	BASS_ERROR_POSITION = 7  // invalid position
+	BASS_ERROR_INIT     = 8  // BASS_Init has not been successfully called
+	BASS_ERROR_START    = 9  // BASS_Start has not been successfully called
+	BASS_ERROR_SSL      = 10 // SSL/HTTPS support isn't available
+	BASS_ERROR_ALREADY  = 14 // already initialized/paused/whatever
+	BASS_ERROR_NOCHAN   = 18 // can't get a free channel
+	BASS_ERROR_ILLTYPE  = 19 // an illegal type was specified
+	BASS_ERROR_ILLPARAM = 20 // an illegal parameter was specified
+	BASS_ERROR_NO3D     = 21 // no 3D support
+	BASS_ERROR_NOEAX    = 22 // no EAX support
+	BASS_ERROR_DEVICE   = 23 // illegal device number
+	BASS_ERROR_NOPLAY   = 24 // not playing
+	BASS_ERROR_FREQ     = 25 // illegal sample rate
+	BASS_ERROR_NOTFILE  = 27 // the stream is not a file stream
+	BASS_ERROR_NOHW     = 29 // no hardware voices available
+	BASS_ERROR_EMPTY    = 31 // the MOD music has no sequence data
+	BASS_ERROR_NONET    = 32 // no internet connection could be opened
+	BASS_ERROR_CREATE   = 33 // couldn't create the file
+	BASS_ERROR_NOFX     = 34 // effects are not available
+	BASS_ERROR_NOTAVAIL = 37 // requested data/action is not available
+	BASS_ERROR_DECODE   = 38 // the channel is/isn't a "decoding channel"
+	BASS_ERROR_DX       = 39 // a sufficient DirectX version is not installed
+	BASS_ERROR_TIMEOUT  = 40 // connection timedout
+	BASS_ERROR_FILEFORM = 41 // unsupported file format
+	BASS_ERROR_SPEAKER  = 42 // unavailable speaker
+	BASS_ERROR_VERSION  = 43 // invalid BASS version (used by add-ons)
+	BASS_ERROR_CODEC    = 44 // codec is not available/supported
+	BASS_ERROR_ENDED    = 45 // the channel/file has ended
+	BASS_ERROR_BUSY     = 46 // the device is busy
+	BASS_ERROR_UNKNOWN  = -1 // some other mystery problem
+)
+
 type ulong C.ulong
 
 //------Initialization,into,tec..
-func Bass_Init() C.int { //Initializes an output device.
-	return C.BASS_Init(-1, 44100, 0, nil, nil)
+// BassInit Initializes an output device.
+func Init() int {
+	return int(C.BASS_Init(-1, 44100, 0, nil, nil))
 }
 
-func Bass_Free() C.int { //Frees all resources used by the output device, including all its samples, streams and MOD musics.
-	return C.BASS_Free()
+// Free Frees all resources used by the output device, including all its samples, streams and MOD musics.
+func Free() int {
+	return int(C.BASS_Free())
 }
 
-func Bass_GetVersion() C.ulong { //Retrieves the version of BASS that is loaded.
-	return C.BASS_GetVersion()
+// GetVersion Retrieves the version of BASS that is loaded.
+func GetVersion() int {
+	return int(C.BASS_GetVersion())
 }
 
-func Bass_GetVolume() C.float { //Retrieves the current master volume level.
-	return C.BASS_GetVolume()
+// GetVolume Retrieves the current master volume level.
+func GetVolume() float32 {
+	return float32(C.BASS_GetVolume())
 }
 
-func Bass_GetInfo(info *C.BASS_INFO) C.int { //Retrieves information on the device being used.
-	return C.BASS_GetInfo(info)
+// GetInfo Retrieves information on the device being used.
+func GetInfo(info *C.BASS_INFO) int {
+	return int(C.BASS_GetInfo(info))
 }
 
-func Bass_Pause() C.int { //Stops the output, pausing all musics/samples/streams on it.
-	return C.BASS_Pause()
+// Pause Stops the output, pausing all musics/samples/streams on it.
+func Pause() int {
+	return int(C.BASS_Pause())
 }
 
-func Bass_SetDevice(device C.ulong) C.int { //Sets the device to use for subsequent calls in the current thread.
-	return C.BASS_SetDevice(device)
+// SetDevice Sets the device to use for subsequent calls in the current thread.
+func SetDevice(device C.uint) int {
+	return int(C.BASS_SetDevice(device))
 }
 
-func Bass_GetDevice(device C.ulong) C.ulong { //Retrieves the device setting of the current thread.
-	return C.BASS_GetDevice()
+func SetVolume(value float32) bool {
+	isok := int(C.BASS_SetVolume(C.float(value)))
+	if isok == 0 {
+		return false
+	}
+	return true
 }
 
-func Bass_GetCPU() C.float { //Retrieves the current CPU usage of BASS.
-	return C.BASS_GetCPU()
+func SetChanAttr(handle uint, attr uint, value float32) uint {
+	r := uint(C.BASS_ChannelSetAttribute(C.uint(handle), C.uint(attr), C.float(value)))
+	return r
+}
+
+func GetChanAttr(handle uint, attr uint) float32 {
+	var value float32
+	C.BASS_ChannelGetAttribute(C.uint(handle), C.uint(attr), (*C.float)(unsafe.Pointer(&value)))
+	return value
+}
+
+func GetChanVol(handle uint) uint {
+	return uint(GetChanAttr(handle, BASS_ATTRIB_VOL) * 100)
+}
+func SetChanVol(handle uint, value uint) uint {
+	return SetChanAttr(handle, BASS_ATTRIB_VOL, float32(value)/100)
+}
+
+// GetDevice Retrieves the device setting of the current thread.
+func GetDevice(device C.ulong) int {
+	return int(C.BASS_GetDevice())
+}
+
+// GetCPU Retrieves the current CPU usage of BASS.
+func GetCPU() float32 {
+	return float32(C.BASS_GetCPU())
 }
 
 //--------------------------------------
 
 //------Streams-------------------------
-func Bass_StreamCreate(freq C.ulong, proc *C.STREAMPROC, user unsafe.Pointer) C.ulong { //Creates a user sample stream.
-	return C.BASS_StreamCreate(freq, 2, C.BASS_SAMPLE_FLOAT, proc, user)
-}
-func Bass_StreamCreateFile(mem C.int, file string, offset C.ulonglong, length C.ulonglong) C.ulong { //Creates a sample stream from an MP3, MP2, MP1, OGG, WAV, AIFF or plugin supported file.
-	return C.BASS_StreamCreateFile(mem, unsafe.Pointer(C.CString(file)), offset, length, C.BASS_SAMPLE_FLOAT)
-}
-func Bass_StreamCreateURL(url string, offset C.ulong, flags C.ulong, proc *C.DOWNLOADPROC, user unsafe.Pointer) C.ulong { //ates a sample stream from an MP3, MP2, MP1, OGG, WAV, AIFF or plugin supported file on the internet, optionally receiving the downloaded data in a callback function.
-	return C.BASS_StreamCreateURL(C.CString(url), offset, flags, proc, user)
+
+// StreamCreate Creates a user sample stream.
+func StreamCreate(freq uint, proc *C.STREAMPROC, user unsafe.Pointer) uint {
+	return uint(C.BASS_StreamCreate(C.uint(freq), 2, C.BASS_SAMPLE_FLOAT, proc, user))
 }
 
-func Bass_StreamPutData(handle C.ulong, buffer []byte, length int) uint32 {
+// StreamCreateFile Creates a sample stream from an MP3, MP2, MP1, OGG, WAV, AIFF or plugin supported file.
+func StreamCreateFile(mem int, file string, offset uint64, length uint64) uint {
+	return uint(C.BASS_StreamCreateFile(C.int(mem), unsafe.Pointer(C.CString(file)), C.ulong(offset), C.ulong(length), C.uint(C.BASS_SAMPLE_FLOAT)))
+}
 
-	return uint32(C.BASS_StreamPutData(handle, C.CBytes(buffer), C.ulong(length)))
+// StreamCreateURL ates a sample stream from an MP3, MP2, MP1, OGG, WAV, AIFF or plugin supported file on the internet, optionally receiving the downloaded data in a callback function.
+func StreamCreateURL(url string, offset uint, proc *C.DOWNLOADPROC, user unsafe.Pointer) uint {
+	return uint(C.BASS_StreamCreateURL(C.CString(url), C.uint(offset), C.BASS_SAMPLE_FLOAT, proc, user))
+}
+
+func StreamPutData(handle uint, buffer []byte, length int) uint32 {
+
+	return uint32(C.BASS_StreamPutData(C.uint(handle), C.CBytes(buffer), C.uint(length)))
+}
+
+func StreamFree(handle uint) uint32 {
+	return uint32(C.BASS_StreamFree(C.uint(handle)))
 }
 
 //--------------------------------------
 
 //------Channels-------------------------
-func Bass_ChannelPlay(handle C.ulong, restart C.int) C.int { //Starts (or resumes) playback of a sample, stream, MOD music, or recording.
-	return C.BASS_ChannelPlay(handle, restart)
+
+// ChannelPlay Starts (or resumes) playback of a sample, stream, MOD music, or recording.
+func ChannelPlay(handle uint, restart int) int {
+	return int(C.BASS_ChannelPlay(C.uint(handle), C.int(restart)))
 }
 
-func BASS_ChannelPause(handle C.ulong) C.int { //Pauses a sample, stream, MOD music, or recording.
-	return C.BASS_ChannelPause(handle)
+// ChannelPause a sample, stream, MOD music, or recording.
+func ChannelPause(handle uint) int {
+	return int(C.BASS_ChannelPause(C.uint(handle)))
 }
 
-func BASS_ChannelStop(handle C.ulong) C.int { //Stops a sample, stream, MOD music, or recording.
-	return C.BASS_ChannelStop(handle)
+// ChannelStop Stops a sample, stream, MOD music, or recording.
+func ChannelStop(handle uint) int {
+	return int(C.BASS_ChannelStop(C.uint(handle)))
 }
 
-func BASS_ChannelBytes2Seconds(handle C.ulong, pos C.ulonglong) C.double { //Translates a byte position into time (seconds), based on a channel's format.
-	return C.BASS_ChannelBytes2Seconds(handle, pos)
+// ChannelBytes2Seconds Translates a byte position into time (seconds), based on a channel's format.
+func ChannelBytes2Seconds(handle uint, pos int) int {
+	return int(C.BASS_ChannelBytes2Seconds(C.uint(handle), C.ulong(pos)))
 }
 
-func BASS_ChannelSeconds2Bytes(handle C.ulong, pos C.double) C.ulonglong { //Translates a time (seconds) position into bytes, based on a channel's format.
-	return BASS_ChannelSeconds2Bytes(handle, pos)
+// ChannelSeconds2Bytes Translates a time (seconds) position into bytes, based on a channel's format.
+func ChannelSeconds2Bytes(handle uint, pos int) int {
+	return int(C.BASS_ChannelSeconds2Bytes(C.uint(handle), C.double(pos)))
 }
 
-func BASS_ChannelIsActive(handle C.ulong) C.ulong { //Checks if a sample, stream, or MOD music is active (playing) or stalled. Can also check if a recording is in progress.
-	return C.BASS_ChannelIsActive(handle)
+// ChannelIsActive Checks if a sample, stream, or MOD music is active (playing) or stalled. Can also check if a recording is in progress.
+func ChannelIsActive(handle uint) int {
+	return int(C.BASS_ChannelIsActive(C.uint(handle)))
 }
 
-func BASS_ChannelGetPosition(handle C.ulong, mode C.ulong) C.ulonglong { //Retrieves the playback position of a sample, stream, or MOD music. Can also be used with a recording channel.
-	return C.BASS_ChannelGetPosition(handle, mode)
+// ChannelGetPosition Retrieves the playback position of a sample, stream, or MOD music. Can also be used with a recording channel.
+func ChannelGetPosition(handle uint, mode int) int {
+	return int(C.BASS_ChannelGetPosition(C.uint(handle), C.uint(mode)))
 }
 
-func BASS_ChannelSetPosition(handle C.ulong, pos C.ulonglong, mode C.ulong) C.int { //Sets the playback position of a sample, MOD music, or stream.
-	return BASS_ChannelSetPosition(handle, pos, mode)
+// ChannelSetPosition Sets the playback position of a sample, MOD music, or stream.
+func ChannelSetPosition(handle uint, pos int, mode int) int {
+	return int(C.BASS_ChannelSetPosition(C.uint(handle), C.ulong(pos), C.uint(mode)))
 }
 
-func BASS_ChannelSetAttribute(handle C.ulong, attrib C.ulong, value C.float) C.int { //Sets the value of a channel's attribute.
-	return BASS_ChannelSetAttribute(handle, attrib, value)
+// ChannelSetAttribute Sets the value of a channel's attribute.
+func ChannelSetAttribute(handle uint, attrib C.uint, value C.float) int {
+	return int(C.BASS_ChannelSetAttribute(C.uint(handle), attrib, value))
 }
 
-func BASS_ChannelUpdate(handle C.ulong, length C.ulong) C.int { //Updates the playback buffer of a stream or MOD music.
-	return BASS_ChannelUpdate(handle, length)
+// ChannelUpdate Updates the playback buffer of a stream or MOD music.
+func ChannelUpdate(handle uint, length C.uint) int {
+	return int(C.BASS_ChannelUpdate(C.uint(handle), length))
+}
+
+// ChannelGetLength Retrieves the playback length of a channel.
+func ChannelGetLength(handle uint, mode int) int {
+	return int(C.BASS_ChannelGetLength(C.uint(handle), C.uint(mode)))
 }
 
 //---------------------------------------
+const (
+	BASS_UNICODE = C.BASS_UNICODE
+)
+
+func PluginLoad(file string) int {
+	result := int(C.BASS_PluginLoad(C.CString(file), C.uint(0)))
+	switch result {
+	case BASS_ERROR_FILEOPEN:
+		log.Println("err:", "BASS_ERROR_FILEOPEN")
+		break
+	case BASS_ERROR_FILEFORM:
+		log.Println("err:", "BASS_ERROR_FILEFORM")
+		break
+	case BASS_ERROR_VERSION:
+		log.Println("err:", "BASS_ERROR_VERSION")
+		break
+	}
+	return result
+}
+
+func PluginFree(handle int) bool {
+	result := int(C.BASS_PluginFree(C.uint(handle)))
+	if result == 0 {
+		return false
+	}
+	return true
+}
