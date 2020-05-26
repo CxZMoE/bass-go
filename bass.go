@@ -259,6 +259,7 @@ const (
 	BASS_UNICODE = C.BASS_UNICODE
 )
 
+// PluginLoad load a bass plugin
 func PluginLoad(file string) int {
 	result := int(C.BASS_PluginLoad(C.CString(file), C.uint(0)))
 	switch result {
@@ -275,6 +276,7 @@ func PluginLoad(file string) int {
 	return result
 }
 
+// PluginFree free a bass plugin
 func PluginFree(handle int) bool {
 	result := int(C.BASS_PluginFree(C.uint(handle)))
 	if result == 0 {
