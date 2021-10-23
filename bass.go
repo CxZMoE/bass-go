@@ -128,7 +128,7 @@ func Pause() int {
 
 // SetDevice Sets the device to use for subsequent calls in the current thread.
 func SetDevice(device C.uint) int {
-	return int(C.BASS_SetDevice(C.uint(device)))
+	return int(C.BASS_SetDevice(C.ulong(device)))
 }
 
 func SetVolume(value float32) bool {
