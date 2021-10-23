@@ -14,7 +14,7 @@ Windows `bass.dll`
 前往[官网](http://www.un4seen.com/bass.html)下载
 
 ## Simply play a MP3 file from Url
-```
+``` golang
 package main
 
 
@@ -24,9 +24,12 @@ import (
 )
 
 func main() {
-	bass.Bass_Init()
-	handle := bass.Bass_StreamCreateURL("http://music.163.com/song/media/outer/url?id=480097178.mp3", 0, 0, nil, nil)
-	bass.Bass_ChannelPlay(handle, 0)
+	err := bass.Init()
+	if err == bass.BASS_ERROR_INIT {
+		panic("Failed to init bass")
+	}
+	handle := bass.StreamCreateFile(0, "./KING.mp3", 0, 0)
+	bass.ChannelPlay(handle, 0)
 	fmt.Scanln()
 }
 ```
