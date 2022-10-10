@@ -1,4 +1,4 @@
-module github.com/CxZMoE/bass-go/m
+module github.com/CxZMoE/bass-go
 
 
 
